@@ -2,11 +2,24 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, DollarSign, TrendingUp, AlertCircle, CheckCircle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Calendar, Users, DollarSign, TrendingUp, AlertCircle, CheckCircle, Wallet, RefreshCw } from "lucide-react"
 import { mockOverviewData } from "@/lib/mock-data"
+import { useIntmax } from "@/hooks/use-intmax"
+import { useState } from "react"
 
 export default function OverviewPage() {
   const { nextPayoutDate, employeeCount, estimatedGasUSD } = mockOverviewData
+  const { wallet, isLoading, error, connectWallet, refreshBalance, clearError } = useIntmax()
+  const [evmAddress, setEvmAddress] = useState("")
+
+  const handleConnectWallet = async () => {
+    if (!evmAddress.trim()) return
+    await connectWallet(evmAddress.trim())
+  }
 
   return (
     <div className="space-y-6">
@@ -22,6 +35,96 @@ export default function OverviewPage() {
           </Badge>
         </div>
       </div>
+
+      {/* INTMAX Wallet Connection */}
+      <Card className="border-slate-200 bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Wallet className="w-5 h-5" />
+            <span>INTMAX Wallet Connection</span>
+          </CardTitle>
+          <CardDescription>Connect your EVM wallet to access INTMAX features</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert className="mb-4 border-red-200 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-700">
+                {error}
+                <Button variant="ghost" size="sm" onClick={clearError} className="ml-2 h-auto p-0 text-red-600">
+                  Dismiss
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!wallet ? (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="evm-address">EVM Wallet Address</Label>
+                <Input
+                  id="evm-address"
+                  placeholder="0x..."
+                  value={evmAddress}
+                  onChange={(e) => setEvmAddress(e.target.value)}
+                  className="font-mono"
+                />
+              </div>
+              <Button onClick={handleConnectWallet} disabled={isLoading || !evmAddress.trim()} className="w-full">
+                {isLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Connect Wallet
+                  </>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-slate-600">EVM Address</Label>
+                  <div className="p-3 bg-slate-50 rounded-lg">
+                    <code className="text-sm font-mono text-slate-900">{wallet.evmAddress}</code>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-slate-600">INTMAX Address</Label>
+                  <div className="p-3 bg-slate-50 rounded-lg">
+                    <code className="text-sm font-mono text-slate-900">{wallet.intmaxAddress}</code>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                <div>
+                  <p className="text-sm font-medium text-emerald-900">INTMAX Balance</p>
+                  <p className="text-2xl font-bold text-emerald-900">{wallet.balance} USDC</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshBalance}
+                  disabled={isLoading}
+                  className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 bg-transparent"
+                >
+                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                </Button>
+              </div>
+
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Wallet Connected
+              </Badge>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Key Metrics */}
       <div className="grid gap-6 md:grid-cols-4">
@@ -60,12 +163,16 @@ export default function OverviewPage() {
 
         <Card className="border-slate-200 bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Monthly Volume</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-600">INTMAX Balance</CardTitle>
             <TrendingUp className="h-4 w-4 text-slate-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">$45,000</div>
-            <CardDescription className="text-emerald-600">+12% vs last month</CardDescription>
+            <div className="text-2xl font-bold text-slate-900">
+              {wallet ? `${wallet.balance} USDC` : "Not Connected"}
+            </div>
+            <CardDescription className="text-slate-500">
+              {wallet ? "Available for payroll" : "Connect wallet to view"}
+            </CardDescription>
           </CardContent>
         </Card>
       </div>
@@ -142,8 +249,8 @@ export default function OverviewPage() {
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                   <div>
-                    <p className="text-sm font-medium text-slate-900">Zircuit Network</p>
-                    <p className="text-xs text-slate-500">Layer 2 operational</p>
+                    <p className="text-sm font-medium text-slate-900">INTMAX Network</p>
+                    <p className="text-xs text-slate-500">Privacy layer operational</p>
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -155,8 +262,8 @@ export default function OverviewPage() {
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                   <div>
-                    <p className="text-sm font-medium text-slate-900">INTMAX Rollup</p>
-                    <p className="text-xs text-slate-500">Privacy layer active</p>
+                    <p className="text-sm font-medium text-slate-900">Multisend Service</p>
+                    <p className="text-xs text-slate-500">Batch payments ready</p>
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -168,12 +275,12 @@ export default function OverviewPage() {
                 <div className="flex items-center space-x-3">
                   <AlertCircle className="w-5 h-5 text-amber-500" />
                   <div>
-                    <p className="text-sm font-medium text-slate-900">Gas Optimization</p>
-                    <p className="text-xs text-slate-500">EIP-7702 bundling enabled</p>
+                    <p className="text-sm font-medium text-slate-900">Zircuit Bridge</p>
+                    <p className="text-xs text-slate-500">Coming soon</p>
                   </div>
                 </div>
                 <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                  Optimizing
+                  Planned
                 </Badge>
               </div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { INTMAX_CONFIG } from "./intmax-config"
+import { INTMAX_CONFIG, MOCK_CONFIG } from "./intmax-config"
 
 // INTMAX Client wrapper
 export class IntmaxClientWrapper {
@@ -11,14 +11,49 @@ export class IntmaxClientWrapper {
     if (this.isInitialized) return this.client
 
     try {
-      // INTMAX Client SDK import - dynamic import for client-side only
-      const { IntmaxClient } = await import("@intmax/client")
+      if (MOCK_CONFIG.enabled) {
+        // Mock implementation for development
+        this.client = {
+          getIntmaxAddress: async (evmAddress: string) => {
+            await this.mockDelay()
+            return `intmax_${evmAddress.slice(-8)}`
+          },
+          getBalance: async (intmaxAddress: string) => {
+            await this.mockDelay()
+            return MOCK_CONFIG.mockBalances[intmaxAddress] || "0.00"
+          },
+          createWallet: async () => {
+            await this.mockDelay()
+            const randomAddress = `0x${Math.random().toString(16).slice(2, 42)}`
+            const randomPrivateKey = `0x${Math.random().toString(16).slice(2, 66)}`
+            return {
+              address: randomAddress,
+              privateKey: randomPrivateKey,
+              intmaxAddress: `intmax_${randomAddress.slice(-8)}`,
+            }
+          },
+          login: async (evmPrivateKey: string) => {
+            await this.mockDelay()
+            return {
+              intmaxAddress: `intmax_${evmPrivateKey.slice(-8)}`,
+              success: true,
+            }
+          },
+          multisend: async (fromAddress: string, transfers: Array<{ to: string; amount: string }>) => {
+            await this.mockDelay()
+            return `0x${Math.random().toString(16).slice(2, 66)}`
+          },
+        }
+      } else {
+        // Real INTMAX Client SDK import - dynamic import for client-side only
+        const { IntmaxClient } = await import("@intmax/client")
 
-      this.client = new IntmaxClient({
-        network: INTMAX_CONFIG.network,
-        rpcUrl: INTMAX_CONFIG.rpcUrl,
-        apiUrl: INTMAX_CONFIG.apiUrl,
-      })
+        this.client = new IntmaxClient({
+          network: INTMAX_CONFIG.network,
+          rpcUrl: INTMAX_CONFIG.rpcUrl,
+          apiUrl: INTMAX_CONFIG.apiUrl,
+        })
+      }
 
       this.isInitialized = true
       console.log("INTMAX Client initialized successfully")
@@ -26,6 +61,12 @@ export class IntmaxClientWrapper {
     } catch (error) {
       console.error("Failed to initialize INTMAX Client:", error)
       throw error
+    }
+  }
+
+  private async mockDelay() {
+    if (MOCK_CONFIG.enabled) {
+      await new Promise((resolve) => setTimeout(resolve, MOCK_CONFIG.mockDelay))
     }
   }
 
