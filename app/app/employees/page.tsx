@@ -136,22 +136,6 @@ export default function EmployeesPage() {
     setEditingEmployee(null)
   }
 
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      resetForm()
-      setEditingEmployee(null)
-    }
-    setIsAddDialogOpen(open)
-  }
-
-  const handleEditDialogClose = (open: boolean) => {
-    if (!open) {
-      resetForm()
-      setEditingEmployee(null)
-    }
-    setIsEditDialogOpen(open)
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -215,9 +199,20 @@ export default function EmployeesPage() {
 
           {/* Add Employee Button at bottom */}
           <div className="mt-6 pt-4 border-t border-purple-200">
-            <Dialog open={isAddDialogOpen} onOpenChange={handleDialogClose}>
+            <Dialog
+              open={isAddDialogOpen}
+              onOpenChange={(open) => {
+                setIsAddDialogOpen(open)
+                if (!open) {
+                  resetForm()
+                }
+              }}
+            >
               <DialogTrigger asChild>
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                <Button
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  onClick={() => setIsAddDialogOpen(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add New Employee
                 </Button>
@@ -282,7 +277,7 @@ export default function EmployeesPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => handleDialogClose(false)}
+                      onClick={() => setIsAddDialogOpen(false)}
                       className="border-purple-300 hover:bg-purple-50"
                     >
                       Cancel
@@ -316,7 +311,16 @@ export default function EmployeesPage() {
       </Card>
 
       {/* Edit Employee Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogClose}>
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open)
+          if (!open) {
+            resetForm()
+            setEditingEmployee(null)
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Employee</DialogTitle>
@@ -371,7 +375,7 @@ export default function EmployeesPage() {
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => handleEditDialogClose(false)}
+              onClick={() => setIsEditDialogOpen(false)}
               className="border-purple-300 hover:bg-purple-50"
             >
               Cancel

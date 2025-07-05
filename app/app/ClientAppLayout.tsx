@@ -46,7 +46,7 @@ export default function ClientAppLayout({
             <Image src="/rollpay-logo.png" alt="RollPay Logo" width={32} height={32} className="rounded-lg" />
             <div>
               <Image src="/rollpay-text.png" alt="RollPay" width={100} height={30} />
-              <div className="text-xs text-purple-200 font-medium">ENTERPRISE</div>
+              <div className="text-xs text-purple-200 font-medium">{""}</div>
             </div>
           </div>
           <Button
