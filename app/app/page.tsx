@@ -3,22 +3,27 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Calendar, Users, DollarSign, TrendingUp, AlertCircle, CheckCircle, Wallet, RefreshCw } from "lucide-react"
+import {
+  Calendar,
+  Users,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Wallet,
+  RefreshCw,
+  Copy,
+} from "lucide-react"
 import { mockOverviewData } from "@/lib/mock-data"
-import { useIntmax } from "@/hooks/use-intmax"
-import { useState } from "react"
+import { useWallet } from "@/hooks/use-wallet"
 
 export default function OverviewPage() {
   const { nextPayoutDate, employeeCount, estimatedGasUSD } = mockOverviewData
-  const { wallet, isLoading, error, connectWallet, refreshBalance, clearError } = useIntmax()
-  const [evmAddress, setEvmAddress] = useState("")
+  const { wallet, isLoading, error, connectWallet, disconnectWallet, clearError } = useWallet()
 
-  const handleConnectWallet = async () => {
-    if (!evmAddress.trim()) return
-    await connectWallet(evmAddress.trim())
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
   }
 
   return (
@@ -43,7 +48,7 @@ export default function OverviewPage() {
             <Wallet className="w-5 h-5" />
             <span>INTMAX Wallet Connection</span>
           </CardTitle>
-          <CardDescription>Connect your EVM wallet to access INTMAX features</CardDescription>
+          <CardDescription>Connect your MetaMask wallet to access INTMAX features</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -58,45 +63,56 @@ export default function OverviewPage() {
             </Alert>
           )}
 
-          {!wallet ? (
+          {!wallet.isConnected ? (
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="evm-address">EVM Wallet Address</Label>
-                <Input
-                  id="evm-address"
-                  placeholder="0x..."
-                  value={evmAddress}
-                  onChange={(e) => setEvmAddress(e.target.value)}
-                  className="font-mono"
-                />
+              <div className="text-center">
+                <p className="text-sm text-slate-600 mb-4">
+                  Connect your MetaMask wallet to start using RollPay's privacy-preserving payroll system
+                </p>
+                <Button onClick={connectWallet} disabled={isLoading} className="w-full max-w-sm">
+                  {isLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Connect MetaMask
+                    </>
+                  )}
+                </Button>
               </div>
-              <Button onClick={handleConnectWallet} disabled={isLoading || !evmAddress.trim()} className="w-full">
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  <>
-                    <Wallet className="w-4 h-4 mr-2" />
-                    Connect Wallet
-                  </>
-                )}
-              </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-600">EVM Address</Label>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <code className="text-sm font-mono text-slate-900">{wallet.evmAddress}</code>
+                  <label className="text-sm font-medium text-slate-600">EVM Address</label>
+                  <div className="flex items-center space-x-2 p-3 bg-slate-50 rounded-lg">
+                    <code className="text-sm font-mono text-slate-900 flex-1 truncate">{wallet.address}</code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(wallet.address!)}
+                      className="h-auto p-1"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-slate-600">INTMAX Address</Label>
-                  <div className="p-3 bg-slate-50 rounded-lg">
-                    <code className="text-sm font-mono text-slate-900">{wallet.intmaxAddress}</code>
+                  <label className="text-sm font-medium text-slate-600">INTMAX Address</label>
+                  <div className="flex items-center space-x-2 p-3 bg-slate-50 rounded-lg">
+                    <code className="text-sm font-mono text-slate-900 flex-1 truncate">{wallet.intmaxAddress}</code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(wallet.intmaxAddress!)}
+                      className="h-auto p-1"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -104,17 +120,18 @@ export default function OverviewPage() {
               <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
                 <div>
                   <p className="text-sm font-medium text-emerald-900">INTMAX Balance</p>
-                  <p className="text-2xl font-bold text-emerald-900">{wallet.balance} USDC</p>
+                  <p className="text-2xl font-bold text-emerald-900">{wallet.balance.toFixed(2)} USDC</p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={refreshBalance}
-                  disabled={isLoading}
-                  className="border-emerald-300 text-emerald-700 hover:bg-emerald-100 bg-transparent"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={disconnectWallet}
+                    className="border-slate-300 text-slate-700 hover:bg-slate-100 bg-transparent"
+                  >
+                    Disconnect
+                  </Button>
+                </div>
               </div>
 
               <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
@@ -168,10 +185,10 @@ export default function OverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900">
-              {wallet ? `${wallet.balance} USDC` : "Not Connected"}
+              {wallet.isConnected ? `${wallet.balance.toFixed(2)} USDC` : "Not Connected"}
             </div>
             <CardDescription className="text-slate-500">
-              {wallet ? "Available for payroll" : "Connect wallet to view"}
+              {wallet.isConnected ? "Available for payroll" : "Connect wallet to view"}
             </CardDescription>
           </CardContent>
         </Card>
