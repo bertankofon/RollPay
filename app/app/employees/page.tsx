@@ -38,21 +38,38 @@ export default function EmployeesPage() {
 
   const totalMonthlySalary = employees.reduce((sum, employee) => sum + employee.monthlySalary, 0)
 
+  const resetForm = () => {
+    setFormData({ name: "", email: "", intmaxId: "", monthlySalary: "" })
+  }
+
   const handleAddEmployee = () => {
-    if (!formData.name || !formData.email || !formData.intmaxId || !formData.monthlySalary) {
+    // Validation
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.intmaxId.trim() ||
+      !formData.monthlySalary.trim()
+    ) {
+      alert("Please fill in all fields")
+      return
+    }
+
+    const salary = Number.parseFloat(formData.monthlySalary)
+    if (isNaN(salary) || salary <= 0) {
+      alert("Please enter a valid salary amount")
       return
     }
 
     const newEmployee: Employee = {
-      id: (employees.length + 1).toString(),
-      name: formData.name,
-      email: formData.email,
-      intmaxId: formData.intmaxId,
-      monthlySalary: Number.parseFloat(formData.monthlySalary),
+      id: Date.now().toString(), // Use timestamp for unique ID
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      intmaxId: formData.intmaxId.trim(),
+      monthlySalary: salary,
     }
 
     setEmployees([...employees, newEmployee])
-    setFormData({ name: "", email: "", intmaxId: "", monthlySalary: "" })
+    resetForm()
     setIsAddDialogOpen(false)
   }
 
@@ -68,7 +85,20 @@ export default function EmployeesPage() {
   }
 
   const handleUpdateEmployee = () => {
-    if (!editingEmployee || !formData.name || !formData.email || !formData.intmaxId || !formData.monthlySalary) {
+    if (
+      !editingEmployee ||
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.intmaxId.trim() ||
+      !formData.monthlySalary.trim()
+    ) {
+      alert("Please fill in all fields")
+      return
+    }
+
+    const salary = Number.parseFloat(formData.monthlySalary)
+    if (isNaN(salary) || salary <= 0) {
+      alert("Please enter a valid salary amount")
       return
     }
 
@@ -76,18 +106,34 @@ export default function EmployeesPage() {
       emp.id === editingEmployee.id
         ? {
             ...emp,
-            name: formData.name,
-            email: formData.email,
-            intmaxId: formData.intmaxId,
-            monthlySalary: Number.parseFloat(formData.monthlySalary),
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            intmaxId: formData.intmaxId.trim(),
+            monthlySalary: salary,
           }
         : emp,
     )
 
     setEmployees(updatedEmployees)
-    setFormData({ name: "", email: "", intmaxId: "", monthlySalary: "" })
+    resetForm()
     setIsEditDialogOpen(false)
     setEditingEmployee(null)
+  }
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      resetForm()
+      setEditingEmployee(null)
+    }
+    setIsAddDialogOpen(open)
+  }
+
+  const handleEditDialogClose = (open: boolean) => {
+    if (!open) {
+      resetForm()
+      setEditingEmployee(null)
+    }
+    setIsEditDialogOpen(open)
   }
 
   return (
@@ -98,7 +144,7 @@ export default function EmployeesPage() {
           <p className="text-gray-600 mt-1">Manage your employee information and payroll details</p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={handleDialogClose}>
           <DialogTrigger asChild>
             <Button className="flex items-center space-x-2">
               <Plus className="h-4 w-4" />
@@ -112,7 +158,7 @@ export default function EmployeesPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -121,7 +167,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -131,7 +177,7 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="intmaxId">INTMAX Address</Label>
+                <Label htmlFor="intmaxId">INTMAX Address *</Label>
                 <Input
                   id="intmaxId"
                   value={formData.intmaxId}
@@ -141,10 +187,12 @@ export default function EmployeesPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="salary">Monthly Salary (USD)</Label>
+                <Label htmlFor="salary">Monthly Salary (USD) *</Label>
                 <Input
                   id="salary"
                   type="number"
+                  min="0"
+                  step="0.01"
                   value={formData.monthlySalary}
                   onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
                   placeholder="4500"
@@ -152,6 +200,9 @@ export default function EmployeesPage() {
               </div>
             </div>
             <DialogFooter>
+              <Button variant="outline" onClick={() => handleDialogClose(false)}>
+                Cancel
+              </Button>
               <Button type="submit" onClick={handleAddEmployee}>
                 Add Employee
               </Button>
@@ -222,7 +273,7 @@ export default function EmployeesPage() {
       </Card>
 
       {/* Edit Employee Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={handleEditDialogClose}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Employee</DialogTitle>
@@ -230,7 +281,7 @@ export default function EmployeesPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-name">Name</Label>
+              <Label htmlFor="edit-name">Name *</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
@@ -239,7 +290,7 @@ export default function EmployeesPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-email">Email</Label>
+              <Label htmlFor="edit-email">Email *</Label>
               <Input
                 id="edit-email"
                 type="email"
@@ -249,7 +300,7 @@ export default function EmployeesPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-intmaxId">INTMAX Address</Label>
+              <Label htmlFor="edit-intmaxId">INTMAX Address *</Label>
               <Input
                 id="edit-intmaxId"
                 value={formData.intmaxId}
@@ -259,10 +310,12 @@ export default function EmployeesPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-salary">Monthly Salary (USD)</Label>
+              <Label htmlFor="edit-salary">Monthly Salary (USD) *</Label>
               <Input
                 id="edit-salary"
                 type="number"
+                min="0"
+                step="0.01"
                 value={formData.monthlySalary}
                 onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
                 placeholder="4500"
@@ -270,6 +323,9 @@ export default function EmployeesPage() {
             </div>
           </div>
           <DialogFooter>
+            <Button variant="outline" onClick={() => handleEditDialogClose(false)}>
+              Cancel
+            </Button>
             <Button type="submit" onClick={handleUpdateEmployee}>
               Update Employee
             </Button>

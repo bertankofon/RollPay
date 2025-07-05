@@ -14,16 +14,42 @@ import {
   Wallet,
   RefreshCw,
   Copy,
+  Send,
 } from "lucide-react"
-import { mockOverviewData } from "@/lib/mock-data"
+import { mockOverviewData, mockEmployees } from "@/lib/mock-data"
 import { useWallet } from "@/hooks/use-wallet"
+import { useState } from "react"
 
 export default function OverviewPage() {
-  const { nextPayoutDate, employeeCount, estimatedGasUSD } = mockOverviewData
+  const { nextPayoutDate, estimatedGasUSD } = mockOverviewData
   const { wallet, isLoading, error, connectWallet, disconnectWallet, clearError } = useWallet()
+  const [isPayingOut, setIsPayingOut] = useState(false)
+
+  // Calculate real employee data
+  const employeeCount = mockEmployees.length
+  const totalMonthlyPayroll = mockEmployees.reduce((sum, employee) => sum + employee.monthlySalary, 0)
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
+  }
+
+  const handlePaySalaries = async () => {
+    if (!wallet.isConnected) {
+      alert("Please connect your wallet first")
+      return
+    }
+
+    setIsPayingOut(true)
+
+    // Simulate payment process
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // 2 second delay
+      alert(`Successfully initiated payment of $${totalMonthlyPayroll.toLocaleString()} to ${employeeCount} employees!`)
+    } catch (error) {
+      alert("Payment failed. Please try again.")
+    } finally {
+      setIsPayingOut(false)
+    }
   }
 
   return (
@@ -193,6 +219,48 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Monthly Payroll Summary */}
+      <Card className="border-slate-200 bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <DollarSign className="w-5 h-5" />
+            <span>Monthly Payroll Summary</span>
+          </CardTitle>
+          <CardDescription>Current month's payroll overview and payment actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+            <div>
+              <p className="text-sm font-medium text-slate-600">Total Monthly Payroll</p>
+              <p className="text-3xl font-bold text-slate-900">${totalMonthlyPayroll.toLocaleString()}</p>
+              <p className="text-sm text-slate-500 mt-1">
+                {employeeCount} employees • Next payment: {nextPayoutDate}
+              </p>
+            </div>
+            <div className="flex flex-col space-y-2">
+              <Button
+                onClick={handlePaySalaries}
+                disabled={!wallet.isConnected || isPayingOut}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {isPayingOut ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Pay Salaries
+                  </>
+                )}
+              </Button>
+              {!wallet.isConnected && <p className="text-xs text-slate-500 text-center">Connect wallet to pay</p>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Transaction Activity */}
