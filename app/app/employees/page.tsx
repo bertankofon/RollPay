@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,7 +44,11 @@ export default function EmployeesPage() {
     setFormData({ name: "", email: "", intmaxId: "", monthlySalary: "" })
   }
 
-  const handleAddEmployee = () => {
+  const handleAddEmployee = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault()
+    }
+
     // Validation
     if (
       !formData.name.trim() ||
@@ -54,6 +60,13 @@ export default function EmployeesPage() {
       return
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email.trim())) {
+      alert("Please enter a valid email address")
+      return
+    }
+
     const salary = Number.parseFloat(formData.monthlySalary)
     if (isNaN(salary) || salary <= 0) {
       alert("Please enter a valid salary amount")
@@ -61,7 +74,7 @@ export default function EmployeesPage() {
     }
 
     const newEmployee: Employee = {
-      id: Date.now().toString(), // Use timestamp for unique ID
+      id: Date.now().toString(),
       name: formData.name.trim(),
       email: formData.email.trim(),
       intmaxId: formData.intmaxId.trim(),
@@ -71,6 +84,9 @@ export default function EmployeesPage() {
     setEmployees([...employees, newEmployee])
     resetForm()
     setIsAddDialogOpen(false)
+
+    // Success message
+    alert(`Employee ${newEmployee.name} has been successfully added!`)
   }
 
   const handleEditEmployee = (employee: Employee) => {
@@ -156,57 +172,61 @@ export default function EmployeesPage() {
               <DialogTitle>Add New Employee</DialogTitle>
               <DialogDescription>Enter the employee details to add them to your payroll system.</DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="John Doe"
-                />
+            <form onSubmit={handleAddEmployee}>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="john@company.com"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="intmaxId">INTMAX Address *</Label>
+                  <Input
+                    id="intmaxId"
+                    value={formData.intmaxId}
+                    onChange={(e) => setFormData({ ...formData, intmaxId: e.target.value })}
+                    placeholder="T6rZy11KtFN2Zo2yJP15So7L1cMMaQtsiNc96Lyi7dc2ffiMcP7JU5J7tUZ2w3QgpB6w2ipKHpCQb3yDZGhaWUK84KStp3F"
+                    className="font-mono text-xs"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="salary">Monthly Salary (USD) *</Label>
+                  <Input
+                    id="salary"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.monthlySalary}
+                    onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
+                    placeholder="4500"
+                    required
+                  />
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="john@company.com"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="intmaxId">INTMAX Address *</Label>
-                <Input
-                  id="intmaxId"
-                  value={formData.intmaxId}
-                  onChange={(e) => setFormData({ ...formData, intmaxId: e.target.value })}
-                  placeholder="T6rZy11KtFN2Zo2yJP15So7L1cMMaQtsiNc96Lyi7dc2ffiMcP7JU5J7tUZ2w3QgpB6w2ipKHpCQb3yDZGhaWUK84KStp3F"
-                  className="font-mono text-xs"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="salary">Monthly Salary (USD) *</Label>
-                <Input
-                  id="salary"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.monthlySalary}
-                  onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
-                  placeholder="4500"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => handleDialogClose(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" onClick={handleAddEmployee}>
-                Add Employee
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Add Employee</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
