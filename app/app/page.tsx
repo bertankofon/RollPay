@@ -4,18 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Calendar,
-  Users,
-  DollarSign,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  Wallet,
-  RefreshCw,
-  Copy,
-  Send,
-} from "lucide-react"
+import { DollarSign, AlertCircle, CheckCircle, Wallet, RefreshCw, Copy, Send } from "lucide-react"
 import { mockOverviewData, mockEmployees } from "@/lib/mock-data"
 import { useWallet } from "@/hooks/use-wallet"
 import { useState } from "react"
@@ -168,57 +157,6 @@ export default function OverviewPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Key Metrics */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card className="border-slate-200 bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Next Settlement</CardTitle>
-            <Calendar className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{nextPayoutDate}</div>
-            <CardDescription className="text-slate-500">Automated execution scheduled</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Active Employees</CardTitle>
-            <Users className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{employeeCount}</div>
-            <CardDescription className="text-slate-500">Enrolled in payroll system</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Transaction Cost</CardTitle>
-            <DollarSign className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-900">${estimatedGasUSD}</div>
-            <CardDescription className="text-emerald-600">-23% vs last month</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200 bg-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">INTMAX Balance</CardTitle>
-            <TrendingUp className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-900">
-              {wallet.isConnected ? `${wallet.balance.toFixed(2)} USDC` : "Not Connected"}
-            </div>
-            <CardDescription className="text-slate-500">
-              {wallet.isConnected ? "Available for payroll" : "Connect wallet to view"}
-            </CardDescription>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Monthly Payroll Summary */}
       <Card className="border-slate-200 bg-white">
