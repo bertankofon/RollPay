@@ -5,6 +5,8 @@ import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -14,315 +16,380 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Mail, Phone, MapPin, Calendar, DollarSign } from "lucide-react"
-
-interface Employee {
-  id: string
-  name: string
-  email: string
-  phone: string
-  address: string
-  walletAddress: string
-  salary: number
-  position: string
-  startDate: string
-  avatar?: string
-}
-
-const mockEmployees: Employee[] = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    email: "alice@company.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St, New York, NY 10001",
-    walletAddress: "0x1234...5678",
-    salary: 75000,
-    position: "Frontend Developer",
-    startDate: "2023-01-15",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: "2",
-    name: "Bob Smith",
-    email: "bob@company.com",
-    phone: "+1 (555) 987-6543",
-    address: "456 Oak Ave, San Francisco, CA 94102",
-    walletAddress: "0xabcd...efgh",
-    salary: 85000,
-    position: "Backend Developer",
-    startDate: "2022-11-20",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: "3",
-    name: "Carol Davis",
-    email: "carol@company.com",
-    phone: "+1 (555) 456-7890",
-    address: "789 Pine Rd, Austin, TX 73301",
-    walletAddress: "0x9876...5432",
-    salary: 90000,
-    position: "Product Manager",
-    startDate: "2023-03-10",
-    avatar: "/placeholder-user.jpg",
-  },
-]
+import { Plus, Search, Edit, DollarSign } from "lucide-react"
+import { mockEmployees, type Employee } from "@/lib/mock-data"
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>(mockEmployees)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
-    address: "",
-    walletAddress: "",
-    salary: "",
-    position: "",
-    startDate: "",
+    intmaxId: "",
+    monthlySalary: "",
   })
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+  const filteredEmployees = employees.filter(
+    (employee) =>
+      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  const totalMonthlySalary = employees.reduce((sum, employee) => sum + employee.monthlySalary, 0)
+
+  const resetForm = () => {
+    setFormData({ name: "", email: "", intmaxId: "", monthlySalary: "" })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleAddEmployee = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault()
+    }
+
+    // Validation
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.intmaxId.trim() ||
+      !formData.monthlySalary.trim()
+    ) {
+      alert("Please fill in all fields")
+      return
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email.trim())) {
+      alert("Please enter a valid email address")
+      return
+    }
+
+    const salary = Number.parseFloat(formData.monthlySalary)
+    if (isNaN(salary) || salary <= 0) {
+      alert("Please enter a valid salary amount")
+      return
+    }
 
     const newEmployee: Employee = {
       id: Date.now().toString(),
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address,
-      walletAddress: formData.walletAddress,
-      salary: Number.parseFloat(formData.salary),
-      position: formData.position,
-      startDate: formData.startDate,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      intmaxId: formData.intmaxId.trim(),
+      monthlySalary: salary,
     }
 
-    setEmployees((prev) => [...prev, newEmployee])
+    setEmployees([...employees, newEmployee])
+    resetForm()
+    setIsAddDialogOpen(false)
+
+    // Success message
+    alert(`Employee ${newEmployee.name} has been successfully added!`)
+  }
+
+  const handleEditEmployee = (employee: Employee) => {
+    setEditingEmployee(employee)
     setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-      walletAddress: "",
-      salary: "",
-      position: "",
-      startDate: "",
+      name: employee.name,
+      email: employee.email,
+      intmaxId: employee.intmaxId,
+      monthlySalary: employee.monthlySalary.toString(),
     })
-    setIsDialogOpen(false)
+    setIsEditDialogOpen(true)
   }
 
-  const formatSalary = (salary: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(salary)
-  }
+  const handleUpdateEmployee = () => {
+    if (
+      !editingEmployee ||
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.intmaxId.trim() ||
+      !formData.monthlySalary.trim()
+    ) {
+      alert("Please fill in all fields")
+      return
+    }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+    const salary = Number.parseFloat(formData.monthlySalary)
+    if (isNaN(salary) || salary <= 0) {
+      alert("Please enter a valid salary amount")
+      return
+    }
+
+    const updatedEmployees = employees.map((emp) =>
+      emp.id === editingEmployee.id
+        ? {
+            ...emp,
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            intmaxId: formData.intmaxId.trim(),
+            monthlySalary: salary,
+          }
+        : emp,
+    )
+
+    setEmployees(updatedEmployees)
+    resetForm()
+    setIsEditDialogOpen(false)
+    setEditingEmployee(null)
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Employee Management
-          </h1>
-          <p className="text-muted-foreground mt-2">Manage your team members and their payroll information</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Employees
+        </h1>
+        <p className="text-slate-600 mt-1">Manage your employee information and payroll details</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {employees.map((employee) => (
-          <Card key={employee.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={employee.avatar || "/placeholder.svg"} alt={employee.name} />
-                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
-                    {employee.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <CardTitle className="text-lg">{employee.name}</CardTitle>
-                  <CardDescription>{employee.position}</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span className="truncate">{employee.email}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>{employee.phone}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span className="truncate">{employee.address}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Started {formatDate(employee.startDate)}</span>
-              </div>
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  <span className="font-semibold text-green-600">{formatSalary(employee.salary)}</span>
-                </div>
-                <Badge variant="outline" className="text-xs">
-                  {employee.walletAddress.slice(0, 6)}...{employee.walletAddress.slice(-4)}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="border-purple-200 bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="text-slate-900">Employee Directory</CardTitle>
+          <CardDescription>All employees enrolled in the payroll system</CardDescription>
+          <div className="relative max-w-sm mt-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-purple-200 focus:border-purple-400"
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-purple-200">
+                  <th className="text-left py-3 px-4 font-medium text-slate-900">Name</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-900">Email</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-900">INTMAX ID</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-900">Monthly Salary</th>
+                  <th className="text-left py-3 px-4 font-medium text-slate-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEmployees.map((employee) => (
+                  <tr key={employee.id} className="border-b border-purple-100 hover:bg-purple-50/50">
+                    <td className="py-3 px-4 font-medium">{employee.name}</td>
+                    <td className="py-3 px-4 text-slate-600">{employee.email}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-slate-500 max-w-[200px] truncate">
+                      {employee.intmaxId}
+                    </td>
+                    <td className="py-3 px-4">${employee.monthlySalary.toLocaleString()}</td>
+                    <td className="py-3 px-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditEmployee(employee)}
+                        className="hover:bg-purple-100"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      <div className="flex justify-center pt-6">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="lg"
-              className="w-full max-w-md bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
+          {/* Add Employee Button at bottom */}
+          <div className="mt-6 pt-4 border-t border-purple-200">
+            <Dialog
+              open={isAddDialogOpen}
+              onOpenChange={(open) => {
+                setIsAddDialogOpen(open)
+                if (!open) {
+                  resetForm()
+                }
+              }}
             >
-              <Plus className="mr-2 h-5 w-5" />
-              Add Employee
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Add New Employee
-              </DialogTitle>
-              <DialogDescription>Enter the employee details to add them to your payroll system.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    placeholder="John Doe"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="position">Position</Label>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) => handleInputChange("position", e.target.value)}
-                    placeholder="Software Engineer"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="john@company.com"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    placeholder="+1 (555) 123-4567"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="startDate">Start Date</Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => handleInputChange("startDate", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  placeholder="123 Main St, City, State 12345"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="walletAddress">Wallet Address</Label>
-                  <Input
-                    id="walletAddress"
-                    value={formData.walletAddress}
-                    onChange={(e) => handleInputChange("walletAddress", e.target.value)}
-                    placeholder="0x1234...5678"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="salary">Annual Salary ($)</Label>
-                  <Input
-                    id="salary"
-                    type="number"
-                    value={formData.salary}
-                    onChange={(e) => handleInputChange("salary", e.target.value)}
-                    placeholder="75000"
-                    required
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
+              <DialogTrigger asChild>
                 <Button
-                  type="submit"
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  onClick={() => setIsAddDialogOpen(true)}
                 >
-                  Add Employee
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Employee
                 </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Employee</DialogTitle>
+                  <DialogDescription>Enter the employee details to add them to your payroll system.</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleAddEmployee}>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Name *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="John Doe"
+                        required
+                        className="border-purple-200 focus:border-purple-400"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="john@company.com"
+                        required
+                        className="border-purple-200 focus:border-purple-400"
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="intmaxId">INTMAX Address *</Label>
+                      <Input
+                        id="intmaxId"
+                        value={formData.intmaxId}
+                        onChange={(e) => setFormData({ ...formData, intmaxId: e.target.value })}
+                        placeholder="T6rZy11KtFN2Zo2yJP15So7L1cMMaQtsiNc96Lyi7dc2ffiMcP7JU5J7tUZ2w3QgpB6w2ipKHpCQb3yDZGhaWUK84KStp3F"
+                        className="font-mono text-xs border-purple-200 focus:border-purple-400"
+                        required
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="salary">Monthly Salary (USD) *</Label>
+                      <Input
+                        id="salary"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={formData.monthlySalary}
+                        onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
+                        placeholder="4500"
+                        required
+                        className="border-purple-200 focus:border-purple-400"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddDialogOpen(false)}
+                      className="border-purple-300 hover:bg-purple-50"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      Add Employee
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Total Monthly Salary Card */}
+      <Card className="border-purple-200 bg-white/80 backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-slate-600">Total Monthly Payroll</CardTitle>
+          <DollarSign className="h-4 w-4 text-purple-400" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            ${totalMonthlySalary.toLocaleString()}
+          </div>
+          <p className="text-xs text-slate-500 mt-1">Total monthly salary for {employees.length} employees</p>
+        </CardContent>
+      </Card>
+
+      {/* Edit Employee Dialog */}
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open)
+          if (!open) {
+            resetForm()
+            setEditingEmployee(null)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogDescription>Update the employee details.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Name *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="John Doe"
+                className="border-purple-200 focus:border-purple-400"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-email">Email *</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="john@company.com"
+                className="border-purple-200 focus:border-purple-400"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-intmaxId">INTMAX Address *</Label>
+              <Input
+                id="edit-intmaxId"
+                value={formData.intmaxId}
+                onChange={(e) => setFormData({ ...formData, intmaxId: e.target.value })}
+                placeholder="T6rZy11KtFN2Zo2yJP15So7L1cMMaQtsiNc96Lyi7dc2ffiMcP7JU5J7tUZ2w3QgpB6w2ipKHpCQb3yDZGhaWUK84KStp3F"
+                className="font-mono text-xs border-purple-200 focus:border-purple-400"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-salary">Monthly Salary (USD) *</Label>
+              <Input
+                id="edit-salary"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.monthlySalary}
+                onChange={(e) => setFormData({ ...formData, monthlySalary: e.target.value })}
+                placeholder="4500"
+                className="border-purple-200 focus:border-purple-400"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+              className="border-purple-300 hover:bg-purple-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={handleUpdateEmployee}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              Update Employee
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
