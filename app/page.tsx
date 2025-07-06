@@ -4,12 +4,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Info } from "lucide-react"
 import Image from "next/image"
-import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 export default function LandingPage() {
-  const [showHowItWorks, setShowHowItWorks] = useState(false)
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-white">
       {/* Header */}
@@ -19,28 +16,29 @@ export default function LandingPage() {
             <Image src="/rollpay-logo.png" alt="RollPay Logo" width={40} height={40} className="rounded-lg" />
           </div>
           <div className="flex items-center gap-4">
-            <Dialog open={showHowItWorks} onOpenChange={setShowHowItWorks}>
+            <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2 bg-transparent">
                   <Info className="w-4 h-4" />
                   How It Works
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+              <DialogContent className="max-w-5xl w-[90vw] max-h-[90vh] overflow-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold text-center mb-4">How RollPay Works</DialogTitle>
+                  <DialogTitle className="text-2xl font-bold text-center mb-6">How RollPay Works</DialogTitle>
                 </DialogHeader>
-                <div className="flex justify-center">
+                <div className="flex justify-center p-4">
                   <Image
                     src="/how-it-works-diagram.jpeg"
                     alt="RollPay Architecture Diagram"
-                    width={800}
-                    height={600}
+                    width={900}
+                    height={700}
                     className="rounded-lg shadow-lg max-w-full h-auto"
+                    priority
                   />
                 </div>
-                <div className="mt-6 text-center">
-                  <p className="text-slate-600 leading-relaxed">
+                <div className="mt-6 text-center px-4">
+                  <p className="text-slate-600 leading-relaxed text-lg">
                     RollPay leverages INTMAX's stateless rollup technology and Zircuit's EIP-7702 smart accounts to
                     enable private, gas-efficient payroll transactions with seamless off-ramp capabilities.
                   </p>
