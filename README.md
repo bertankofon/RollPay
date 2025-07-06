@@ -1,30 +1,5 @@
 # RollPay
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+RollPay lets companies manage their entire payroll process on the blockchain without the usual problems. Companies can add employees, set salaries, and send payments to multiple employees at once. All transactions are completely private - no one can see salary amounts or who got paid what. Gas fees? It's handled by Zircuit's EIP-7702 standart, pay the gas using USDC. 
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/bertankofons-projects/v0-roll-pay)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/p2H3V7Zfk3g)
-
-## Overview
-
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
-
-## Deployment
-
-Your project is live at:
-
-**[https://vercel.com/bertankofons-projects/v0-roll-pay](https://vercel.com/bertankofons-projects/v0-roll-pay)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/p2H3V7Zfk3g](https://v0.dev/chat/projects/p2H3V7Zfk3g)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Built in ETHGlobal Cannes 2025, by Irem & Bertan
