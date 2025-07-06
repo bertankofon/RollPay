@@ -1,10 +1,16 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Shield, TrendingUp, Lock, ArrowRight, CheckCircle } from "lucide-react"
+import { ArrowRight, CheckCircle } from "lucide-react"
 import Image from "next/image"
 
 export default function LandingPage() {
+  const handleFundTestUSDC = () => {
+    // This would integrate with your wallet/funding logic
+    alert("10,000 Test USDC funded to your wallet!")
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-white">
       {/* Header */}
@@ -13,11 +19,20 @@ export default function LandingPage() {
           <div className="flex items-center space-x-3">
             <Image src="/rollpay-logo.png" alt="RollPay Logo" width={40} height={40} className="rounded-lg" />
           </div>
-          <Link href="/app">
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6">
-              Access Dashboard
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={handleFundTestUSDC}
+              variant="outline"
+              className="border-green-300 text-green-700 hover:bg-green-50 bg-transparent"
+            >
+              Fund Test USDC
             </Button>
-          </Link>
+            <Link href="/app">
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6">
+                Access Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -36,22 +51,15 @@ export default function LandingPage() {
             Deploy enterprise payroll with EIP-7702 smart accounts on Zircuit. INTMAX stateless rollup ensures complete
             transaction privacy while maintaining institutional compliance.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link href="/app">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-12 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
               >
-                Launch Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                Launch Dashboard <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-purple-300 text-purple-700 px-8 py-3 text-lg bg-transparent hover:bg-purple-50"
-            >
-              View Documentation
-            </Button>
           </div>
         </div>
       </section>
@@ -88,121 +96,68 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Enterprise Features</h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Built for financial institutions requiring the highest standards of security and compliance.
-          </p>
+      {/* Powered By Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Powered By</h2>
+          <p className="text-lg text-slate-600">Built on cutting-edge blockchain infrastructure</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-8">
-          <Card className="border-purple-200 shadow-sm hover:shadow-md transition-shadow bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-purple-600" />
-              </div>
-              <CardTitle className="text-slate-900">Zero-Knowledge Privacy</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-center text-slate-600 leading-relaxed">
-                INTMAX stateless rollup technology ensures complete transaction privacy. Employee compensation data
-                remains confidential while maintaining audit trails.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 shadow-sm hover:shadow-md transition-shadow bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="h-6 w-6 text-blue-600" />
-              </div>
-              <CardTitle className="text-slate-900">Cost Optimization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-center text-slate-600 leading-relaxed">
-                EIP-7702 smart account bundling reduces transaction costs by up to 90%. Single transaction execution for
-                entire payroll batches.
-              </CardDescription>
-            </CardContent>
-          </Card>
-
-          <Card className="border-purple-200 shadow-sm hover:shadow-md transition-shadow bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-6 w-6 text-purple-600" />
-              </div>
-              <CardTitle className="text-slate-900">Institutional Security</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-center text-slate-600 leading-relaxed">
-                Multi-signature approvals, role-based access control, and comprehensive audit logging. Built to meet
-                enterprise security requirements.
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Technical Architecture */}
-      <section className="bg-gradient-to-r from-purple-900 to-blue-900 text-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Technical Architecture</h2>
-            <p className="text-xl text-purple-100 max-w-2xl mx-auto">
-              Built on cutting-edge blockchain infrastructure for maximum efficiency and security.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-white">Z</span>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Zircuit L2</h3>
-              <p className="text-purple-100">High-performance Layer 2 network optimized for enterprise applications</p>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12 max-w-4xl mx-auto">
+          {/* Zircuit */}
+          <a
+            href="https://zircuit.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col items-center p-6 rounded-xl hover:bg-white/50 transition-all duration-200 hover:shadow-lg"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <Image
+                src="/zircuit-logo.png"
+                alt="Zircuit Logo"
+                width={60}
+                height={60}
+                className="rounded-lg group-hover:scale-110 transition-transform duration-200"
+              />
+              <Image
+                src="/zircuit-text.png"
+                alt="Zircuit"
+                width={120}
+                height={40}
+                className="group-hover:scale-105 transition-transform duration-200"
+              />
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-white">7702</span>
-              </div>
-              <h3 className="text-xl font-bold mb-2">EIP-7702</h3>
-              <p className="text-purple-100">Smart account abstraction for seamless batch transaction processing</p>
+              <h3 className="font-semibold text-slate-900 mb-2">EIP-7702 Smart Accounts</h3>
+              <p className="text-slate-600 text-sm">
+                High-performance Layer 2 network optimized for enterprise applications
+              </p>
+            </div>
+          </a>
+
+          {/* INTMAX */}
+          <a
+            href="https://intmax.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col items-center p-6 rounded-xl hover:bg-white/50 transition-all duration-200 hover:shadow-lg"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <Image
+                src="/intmax-logo.png"
+                alt="INTMAX Logo"
+                width={60}
+                height={60}
+                className="rounded-lg group-hover:scale-110 transition-transform duration-200"
+              />
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-200">
+                INTMAX
+              </span>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-white">IM</span>
-              </div>
-              <h3 className="text-xl font-bold mb-2">INTMAX</h3>
-              <p className="text-purple-100">Stateless rollup technology ensuring complete transaction privacy</p>
+              <h3 className="font-semibold text-slate-900 mb-2">Stateless Rollup</h3>
+              <p className="text-slate-600 text-sm">Complete transaction privacy with zero-knowledge technology</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-white/80 backdrop-blur-sm py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready for Enterprise Deployment?</h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Join leading financial institutions using RollPay for secure, efficient payroll management.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/app">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg"
-              >
-                Access Dashboard <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-purple-300 text-purple-700 px-8 py-3 text-lg bg-transparent hover:bg-purple-50"
-            >
-              Schedule Demo
-            </Button>
-          </div>
+          </a>
         </div>
       </section>
 
