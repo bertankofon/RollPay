@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Info } from "lucide-react"
+import { ArrowRight, Sparkles, Zap } from "lucide-react"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
@@ -18,9 +18,14 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2 bg-transparent">
-                  <Info className="w-4 h-4" />
-                  How It Works
+                <Button 
+                  variant="outline" 
+                  className="relative group bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-300 hover:border-purple-400 text-purple-700 hover:text-purple-800 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 px-6 py-2 rounded-full"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Sparkles className="w-4 h-4 mr-2 relative z-10 group-hover:animate-pulse" />
+                  <span className="relative z-10 font-medium">How It Works</span>
+                  <Zap className="w-4 h-4 ml-2 relative z-10 group-hover:animate-bounce" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-5xl w-[90vw] max-h-[90vh] overflow-auto">
@@ -45,11 +50,6 @@ export default function LandingPage() {
                 </div>
               </DialogContent>
             </Dialog>
-            <Link href="/app">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6">
-                Access Dashboard
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
